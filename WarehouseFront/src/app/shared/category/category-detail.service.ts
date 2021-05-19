@@ -1,0 +1,32 @@
+import { Injectable } from '@angular/core';
+import { HttpClient } from "@angular/common/http"
+import { CategoryDetail } from './category-detail.model';
+
+@Injectable({
+  providedIn: 'root'
+})
+export class CategoryDetailService {
+
+  constructor(private http:HttpClient) { }
+
+  readonly baseURL = "http://192.168.39.90:80/warehouse/api/Categories"
+  formData:CategoryDetail = new CategoryDetail();
+  list:CategoryDetail[];
+
+  postCategoryDetails(){
+    return this.http.post(this.baseURL, this.formData)
+  }
+
+  putCategoryDetails(){
+    return this.http.put(`${this.baseURL}`, this.formData)
+  }
+
+  deleteCategoryDetails(id:number){
+    return this.http.delete(`${this.baseURL}/${id}`)
+  }
+
+  refreshList(){
+    this.http.get(this.baseURL).toPromise()
+    .then(res => this.list = res as CategoryDetail[]);
+  }
+}

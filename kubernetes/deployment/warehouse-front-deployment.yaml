@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: warehouse-front-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: warehouse-front-pod
+  template:
+    metadata:
+      labels:
+        app: warehouse-front-pod
+    spec:
+      containers:
+        - name: warehouse-front-container
+          image: warehouse-front:latest
+          imagePullPolicy: Never
+          resources:
+            limits:
+              memory: "256Mi"
+              cpu: "500m"
+          ports:
+            - containerPort: 80
