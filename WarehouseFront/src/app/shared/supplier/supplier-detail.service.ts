@@ -9,7 +9,7 @@ export class SupplierDetailService {
 
   constructor(private http:HttpClient) { }
 
-  readonly baseURL = "http://192.168.39.90:80/warehouse/api/Suppliers"
+  readonly baseURL = "http://192.168.39.90:80/suppliers/api/Suppliers"
   formData:SupplierDetail = new SupplierDetail();
   list:SupplierDetail[];
 

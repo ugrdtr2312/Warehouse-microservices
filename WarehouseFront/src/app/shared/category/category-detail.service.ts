@@ -9,7 +9,7 @@ export class CategoryDetailService {
 
   constructor(private http:HttpClient) { }
 
-  readonly baseURL = "http://192.168.39.90:80/warehouse/api/Categories"
+  readonly baseURL = "http://192.168.39.90:80/categories/api/Categories"
   formData:CategoryDetail = new CategoryDetail();
   list:CategoryDetail[];
 

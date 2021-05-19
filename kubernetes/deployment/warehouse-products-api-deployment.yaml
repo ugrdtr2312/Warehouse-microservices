@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: warehouse-products-api-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: warehouse-products-api-pod
+  template:
+    metadata:
+      labels:
+        app: warehouse-products-api-pod
+    spec:
+      containers:
+        - name: warehouse-products-api-container
+          image: warehouse-products-api:latest
+          imagePullPolicy: Never
+          resources:
+            limits:
+              memory: "256Mi"
+              cpu: "500m"
+          ports:
+            - containerPort: 80
