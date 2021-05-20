@@ -9,14 +9,14 @@ export class BrandDetailService {
 
   constructor(private http:HttpClient) { }
 
-  readonly baseURL = "http://192.168.39.90:80/brands/api/Brands"
+  readonly baseURL = "http://localhost:5000/api/brands"
   formData:BrandDetail = new BrandDetail();
   list:BrandDetail[];
 
   postBrandDetails(){
     return this.http.post(this.baseURL, this.formData)
   }
-
+ 
   putBrandDetails(){
     return this.http.put(`${this.baseURL}`, this.formData)
   }
@@ -27,6 +27,6 @@ export class BrandDetailService {
 
   refreshList(){
     this.http.get(this.baseURL).toPromise()
-    .then(res => {this.list = res as BrandDetail[]; console.log(res)});
+    .then(res => this.list = res as BrandDetail[]);
   }
 }

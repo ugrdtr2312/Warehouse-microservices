@@ -9,14 +9,14 @@ export class SupplierDetailService {
 
   constructor(private http:HttpClient) { }
 
-  readonly baseURL = "http://192.168.39.90:80/suppliers/api/Suppliers"
+  readonly baseURL = "http://localhost:5000/api/suppliers"
   formData:SupplierDetail = new SupplierDetail();
   list:SupplierDetail[];
 
   postSupplierDetails(){
     return this.http.post(this.baseURL, this.formData)
   }
-
+ 
   putSupplierDetails(){
     return this.http.put(`${this.baseURL}`, this.formData)
   }

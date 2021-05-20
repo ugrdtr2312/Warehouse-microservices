@@ -1,4 +1,4 @@
-import { BrandDetail } from '../brand/brand-detail.model';
+import { BrandDetail } from './../brand/brand-detail.model';
 import { Injectable } from '@angular/core';
 import { ProductDetail } from './product-detail.model';
 import { HttpClient } from "@angular/common/http"
@@ -12,7 +12,7 @@ export class ProductDetailService {
 
   constructor(private http:HttpClient) { }
 
-  readonly baseURL = "http://192.168.39.90:80/products/api/Products"
+  readonly baseURL = "http://localhost:5000/api/products"
   formData:ProductDetail = new ProductDetail();
   list:ProductDetail[];
   categoryList:CategoryDetail[];
@@ -29,7 +29,7 @@ export class ProductDetailService {
 
     return this.http.post(this.baseURL, this.formData)
   }
-
+ 
   putProductDetails(){
     if (this.formData.brandId == "null")
     this.formData.brandId = null;
@@ -37,7 +37,7 @@ export class ProductDetailService {
     this.formData.categoryId = null;
     if (this.formData.supplierId == "null")
     this.formData.supplierId = null;
-
+    
     return this.http.put(`${this.baseURL}`, this.formData)
   }
 
@@ -47,18 +47,18 @@ export class ProductDetailService {
 
   refreshList(){
     this.http.get(this.baseURL).toPromise()
-    .then(res => {
+    .then(res => { 
       this.list = res as ProductDetail[];
       this.list.forEach(element => {
         if (element.brandName == null)
           element.brandName = "-";
-      });
+      });  
     });
-    this.http.get("http://192.168.39.90:80/categories/api/Categories").toPromise()
+    this.http.get("http://localhost:5000/api/categories").toPromise()
     .then(res => this.categoryList = res as CategoryDetail[]);
-    this.http.get("http://192.168.39.90:80/brands/api/Brands").toPromise()
+    this.http.get("http://localhost:5000/api/brands").toPromise()
     .then(res => this.brandList = res as BrandDetail[]);
-    this.http.get("http://192.168.39.90:80/suppliers/api/Suppliers").toPromise()
+    this.http.get("http://localhost:5000/api/suppliers").toPromise()
     .then(res => this.supplierList = res as SupplierDetail[]);
   }
 }

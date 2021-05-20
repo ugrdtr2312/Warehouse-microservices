@@ -9,14 +9,14 @@ export class CategoryDetailService {
 
   constructor(private http:HttpClient) { }
 
-  readonly baseURL = "http://192.168.39.90:80/categories/api/Categories"
+  readonly baseURL = "http://localhost:5000/api/categories"
   formData:CategoryDetail = new CategoryDetail();
   list:CategoryDetail[];
 
   postCategoryDetails(){
     return this.http.post(this.baseURL, this.formData)
   }
-
+ 
   putCategoryDetails(){
     return this.http.put(`${this.baseURL}`, this.formData)
   }
