@@ -1,0 +1,17 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: warehouse-front-ingress
+spec:
+  rules:
+    - host: warehouse
+      http:
+        paths:
+          - path: /
+
+            pathType: Prefix
+            backend:
+              service:
+                name: warehouse-front
+                port:
+                  number: 8080

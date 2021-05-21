@@ -1,0 +1,138 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: brands-api
+spec:
+  selector:
+    matchLabels:
+      app: brands-api
+      tier: backend
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: brands-api
+        tier: backend
+    spec:
+      containers:
+        - name: brands-api-container
+          image: brands-api:latest
+          imagePullPolicy: Never
+          resources:
+            limits:
+              memory: "256Mi"
+              cpu: "500m"
+          ports:
+            - containerPort: 80
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: categories-api
+spec:
+  selector:
+    matchLabels:
+      app: categories-api
+      tier: backend
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: categories-api
+        tier: backend
+    spec:
+      containers:
+        - name: categories-api
+          image: categories-api:latest
+          imagePullPolicy: Never
+          resources:
+            limits:
+              memory: "256Mi"
+              cpu: "500m"
+          ports:
+            - containerPort: 80
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: products-api
+spec:
+  selector:
+    matchLabels:
+      app: products-api
+      tier: backend
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: products-api
+        tier: backend
+    spec:
+      containers:
+        - name: products-api
+          image: products-api:latest
+          imagePullPolicy: Never
+          resources:
+            limits:
+              memory: "256Mi"
+              cpu: "500m"
+          ports:
+            - containerPort: 80
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: suppliers-api
+spec:
+  selector:
+    matchLabels:
+      app: suppliers-api
+      tier: backend
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: suppliers-api
+        tier: backend
+    spec:
+      containers:
+        - name: suppliers-api
+          image: suppliers-api:latest
+          imagePullPolicy: Never
+          resources:
+            limits:
+              memory: "256Mi"
+              cpu: "500m"
+          ports:
+            - containerPort: 80
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: authorization-service
+spec:
+  selector:
+    matchLabels:
+      app: authorization-service
+      tier: backend
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: authorization-service
+        tier: backend
+    spec:
+      containers:
+        - name: authorization-service
+          image: authorization-service:latest
+          imagePullPolicy: Never
+          resources:
+            limits:
+              memory: "256Mi"
+              cpu: "500m"
+          ports:
+            - containerPort: 80

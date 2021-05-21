@@ -1,0 +1,53 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+    nginx.ingress.kubernetes.io/enable-cors: "true"
+    nginx.ingress.kubernetes.io/cors-allow-methods: "PUT, GET, POST, OPTIONS"
+    nginx.ingress.kubernetes.io/cors-allow-origin: "http://192.168.39.7:80/authorization"
+    nginx.ingress.kubernetes.io/cors-allow-credentials: "true"
+  name: warehouse-api-ingress
+spec:
+  rules:
+    - http:
+        paths:
+          - pathType: Prefix
+            path: /brands(/|$)(.*)
+            backend:
+              service:
+                name: brands-api
+                port:
+                  number: 8080
+
+          - pathType: Prefix
+            path: /categories(/|$)(.*)
+            backend:
+              service:
+                name: categories-api
+                port:
+                  number: 8080
+
+          - pathType: Prefix
+            path: /products(/|$)(.*)
+            backend:
+              service:
+                name: products-api
+                port:
+                  number: 8080
+
+          - pathType: Prefix
+            path: /suppliers(/|$)(.*)
+            backend:
+              service:
+                name: suppliers-api
+                port:
+                  number: 8080
+
+          - pathType: Prefix
+            path: /authorization(/|$)(.*)
+            backend:
+              service:
+                name: authorization-service
+                port:
+                  number: 8080
