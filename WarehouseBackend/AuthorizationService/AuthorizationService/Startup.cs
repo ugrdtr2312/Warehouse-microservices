@@ -1,5 +1,7 @@
 using System;
 using System.Text;
+using System.Threading.Channels;
+using AuthorizationService.Handlers;
 using AuthorizationService.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
@@ -26,12 +28,16 @@ namespace AuthorizationService
         public void ConfigureServices(IServiceCollection services)
         {
             //Inject AppSettings
+            var secrets = VaultHandler.GetDataFromVault();
+            JwtService.Token = secrets.JwtSecret;
+            JwtService.ConnectionString = secrets.ConnectionString;
+           
             services.Configure<ApplicationSettings>(Configuration.GetSection("ApplicationSettings"));
 
             services.AddControllers();
-
+            
             services.AddDbContext<AuthenticationContext>(options =>
-                options.UseSqlServer(Configuration.GetConnectionString("Default")));
+                options.UseSqlServer(JwtService.ConnectionString));
 
             services.AddDefaultIdentity<ApplicationUser>()
                 .AddRoles<IdentityRole>()
@@ -51,7 +57,7 @@ namespace AuthorizationService
 
             //Jwt Authentication
 
-            var key = Encoding.UTF8.GetBytes(Configuration["ApplicationSettings:JwtSecret"]);
+            var key = Encoding.UTF8.GetBytes(JwtService.Token);
 
             services.AddAuthentication(x =>
             {

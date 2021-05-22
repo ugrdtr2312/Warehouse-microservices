@@ -7,6 +7,7 @@ using DAL.UoWs;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using WarehouseService.Handlers;
 
 namespace API.DependenciesResolvers
 {
@@ -15,7 +16,7 @@ namespace API.DependenciesResolvers
         public static void DalDependenciesResolver(this IServiceCollection services, IConfiguration configuration)
         {
             services.AddDbContext<WarehouseContext>(
-                options => options.UseSqlServer(configuration.GetConnectionString("Default")));
+                options => options.UseSqlServer(VaultHandler.GetDbDataFromVault()));
 
             services.AddScoped<DbContext, WarehouseContext>();
             services.AddScoped<IUoW, EfUoW>();

@@ -1,5 +1,4 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using System.Threading.Tasks;
 using AuthorizationService.Models;
 using Microsoft.AspNetCore.Authorization;
@@ -24,10 +23,6 @@ namespace AuthorizationService.Controllers
         //GET : /api/UserProfile
         public async Task<object> GetUserProfile()
         {
-            //TODO
-            var token = Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
-            Console.WriteLine(token);
-            
             var userId = User.Claims.First(c => c.Type == "UserID").Value;
             var user = await _userManager.FindByIdAsync(userId);
             return new

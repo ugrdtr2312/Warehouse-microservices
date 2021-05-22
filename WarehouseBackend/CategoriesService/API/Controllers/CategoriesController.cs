@@ -1,8 +1,11 @@
-﻿using System.Threading.Tasks;
+﻿using System.Text;
+using System.Threading.Tasks;
 using BLL.DTOs;
 using BLL.Exceptions;
 using BLL.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
+using RabbitMQ.Client;
 
 namespace API.Controllers
 {
@@ -13,7 +16,7 @@ namespace API.Controllers
     /// <remarks>
     /// This class can get, create, delete, edit category.
     /// </remarks>
-    
+
     // api/categories
     [Route("api/[controller]")]
     [ApiController]
@@ -21,13 +24,13 @@ namespace API.Controllers
     {
         private readonly ICategoryService _categoryService;
 
-        
+
         public CategoriesController(ICategoryService categoryService)
         {
             _categoryService = categoryService;
         }
-       
-        
+
+
         /// <summary>
         /// This method returns all categories
         /// </summary>
@@ -41,13 +44,13 @@ namespace API.Controllers
             return Ok(categories);
         }
 
-        
+
         /// <summary>
         /// This method returns category that has an inputted Id property
         /// </summary>
         /// <response code="200">Returns category that has an inputted Id property</response>
         /// <response code="404">Returns message that nothing was found, if message wasn't returned than id inputted incorrectly</response>
-        
+
         //GET api/categories/{id}
         [HttpGet("{id:int}", Name = "GetCategoryById")]
         public async Task<IActionResult> GetCategoryById(int id)
@@ -62,8 +65,21 @@ namespace API.Controllers
                 return NotFound(e.Message);
             }
         }
-        
-        
+
+        private void PublishToMessageQueue(string integrationEvent, string eventData)
+        {
+            // TOOO: Reuse and close connections and channel, etc,
+            var factory = new ConnectionFactory() { HostName = "192.168.39.180" };
+            var connection = factory.CreateConnection();
+            var channel = connection.CreateModel();
+            var body = Encoding.UTF8.GetBytes(eventData);
+            channel.BasicPublish(exchange: "categories",
+                                 routingKey: integrationEvent,
+                                 basicProperties: null,
+                                 body: body);
+        }
+
+
         /// <summary>
         /// This method returns category that was created and path to it
         /// </summary>
@@ -71,7 +87,7 @@ namespace API.Controllers
         /// <response code="400">Returns message why model is invalid</response>
         /// <response code="404">Returns message if something had gone wrong</response>
 
-        //POST api/categories 
+        //POST api/categories
         [HttpPost]
         [ProducesResponseType(typeof(CategoryDto), 201)]
         public async Task<IActionResult> CreateCategory(CategoryDto categoryDto)
@@ -82,18 +98,25 @@ namespace API.Controllers
                     return BadRequest(ModelState);
                 if (categoryDto.Id != 0)
                     return BadRequest("The Id should be empty");
-               
+
                 var createdCategory = await _categoryService.CreateAsync(categoryDto);
-            
+
+                var integrationEventData = JsonConvert.SerializeObject(new
+                {
+                    id = createdCategory.Id,
+                    categoryName = createdCategory.CategoryName
+                });
+                PublishToMessageQueue("categories.add", integrationEventData);
+
                 //Fetch the category from data source
-                return CreatedAtRoute("GetCategoryById", new {id = createdCategory.Id}, createdCategory);
+                return CreatedAtRoute("GetCategoryById", new { id = createdCategory.Id }, createdCategory);
             }
             catch (DbQueryResultNullException e)
             {
                 return NotFound(e.Message);
             }
         }
-        
+
 
         /// <summary>
         /// This method changes category
@@ -101,7 +124,7 @@ namespace API.Controllers
         /// <response code="204">Returns nothing, category was successfully changed</response>
         /// <response code="400">Returns message why model is invalid</response>
         /// <response code="404">Returns message that category was not found, if message wasn't returned than id inputted incorrectly</response>
-        
+
         //PUT api/categories
         [HttpPut]
         [ProducesResponseType(204)]
@@ -111,7 +134,14 @@ namespace API.Controllers
             {
                 if (!ModelState.IsValid)
                     return BadRequest(ModelState);
-                
+
+                var integrationEventData = JsonConvert.SerializeObject(new
+                {
+                    id = categoryDto.Id,
+                    categoryName = categoryDto.CategoryName
+                });
+                PublishToMessageQueue("categories.update", integrationEventData);
+
                 _categoryService.Update(categoryDto);
                 return NoContent();
             }
@@ -120,14 +150,14 @@ namespace API.Controllers
                 return NotFound(e.Message);
             }
         }
-        
-        
+
+
         /// <summary>
         /// This method deletes category
         /// </summary>
         /// <response code="204">Returns nothing, category was successfully deleted</response>
         /// <response code="404">Returns message that category was not found</response>
-        
+
         //DELETE api/categories/{id}
         [HttpDelete("{id:int}")]
         [ProducesResponseType(204)]

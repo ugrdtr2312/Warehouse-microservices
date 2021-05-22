@@ -9,9 +9,13 @@ namespace DAL.Configurations
         public void Configure(EntityTypeBuilder<Category> builder)
         {
             builder
-                .Property(c => c.CategoryName)
-                .HasMaxLength(50)
-                .IsRequired();
+                    .Property(c => c.CategoryName)
+                    .HasMaxLength(50)
+                    .IsRequired();
+
+            builder
+                    .Property(c => c.Id)
+                    .ValueGeneratedNever();
         }
     }
 }

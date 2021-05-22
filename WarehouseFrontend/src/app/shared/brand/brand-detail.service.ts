@@ -9,7 +9,7 @@ export class BrandDetailService {
 
   constructor(private http:HttpClient) { }
 
-  readonly baseURL = "http://192.168.39.7:80/brands/api/brands"
+  readonly baseURL = "http://192.168.39.180:80/brands/api/brands"
   formData:BrandDetail = new BrandDetail();
   list:BrandDetail[];
 

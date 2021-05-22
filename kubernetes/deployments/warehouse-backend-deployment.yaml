@@ -14,6 +14,7 @@ spec:
         app: brands-api
         tier: backend
     spec:
+      serviceAccountName: vault
       containers:
         - name: brands-api-container
           image: brands-api:latest
@@ -42,6 +43,7 @@ spec:
         app: categories-api
         tier: backend
     spec:
+      serviceAccountName: vault
       containers:
         - name: categories-api
           image: categories-api:latest
@@ -70,6 +72,7 @@ spec:
         app: products-api
         tier: backend
     spec:
+      serviceAccountName: vault
       containers:
         - name: products-api
           image: products-api:latest
@@ -98,6 +101,7 @@ spec:
         app: suppliers-api
         tier: backend
     spec:
+      serviceAccountName: vault
       containers:
         - name: suppliers-api
           image: suppliers-api:latest
@@ -126,6 +130,7 @@ spec:
         app: authorization-service
         tier: backend
     spec:
+      serviceAccountName: vault
       containers:
         - name: authorization-service
           image: authorization-service:latest

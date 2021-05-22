@@ -5,7 +5,7 @@ metadata:
     nginx.ingress.kubernetes.io/rewrite-target: /$2
     nginx.ingress.kubernetes.io/enable-cors: "true"
     nginx.ingress.kubernetes.io/cors-allow-methods: "PUT, GET, POST, OPTIONS"
-    nginx.ingress.kubernetes.io/cors-allow-origin: "http://192.168.39.7:80/authorization"
+    nginx.ingress.kubernetes.io/cors-allow-origin: "http://192.168.39.180:80/authorization"
     nginx.ingress.kubernetes.io/cors-allow-credentials: "true"
   name: warehouse-api-ingress
 spec:
@@ -51,3 +51,10 @@ spec:
                 name: authorization-service
                 port:
                   number: 8080
+          # - pathType: Prefix
+          #   path: /rabbitmq(/|$)(.*)
+          #   backend:
+          #     service:
+          #       name: rabbitmq-ui
+          #       port:
+          #         number: 15672

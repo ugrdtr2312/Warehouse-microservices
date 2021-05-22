@@ -1,4 +1,5 @@
-﻿using DAL.Contexts;
+﻿using API.Handlers;
+using DAL.Contexts;
 using DAL.Interfaces;
 using DAL.Repositories.Interfaces;
 using DAL.Repositories.Realizations;
@@ -14,7 +15,7 @@ namespace API.DependenciesResolvers
         public static void DalDependenciesResolver(this IServiceCollection services, IConfiguration configuration)
         {
             services.AddDbContext<WarehouseContext>(
-                options => options.UseSqlServer(configuration.GetConnectionString("Default")));
+                options => options.UseSqlServer(VaultHandler.GetDbDataFromVault()));
 
             services.AddScoped<DbContext, WarehouseContext>();
             services.AddScoped<IUoW, EfUoW>();

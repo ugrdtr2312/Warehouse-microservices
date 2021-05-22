@@ -12,6 +12,10 @@ namespace DAL.Configurations
                 .Property(b => b.BrandName)
                 .HasMaxLength(50)
                 .IsRequired();
+            
+            builder
+                    .Property(b => b.Id)
+                   .ValueGeneratedNever();
         }
     }
 }

@@ -9,9 +9,13 @@ namespace DAL.Configurations
         public void Configure(EntityTypeBuilder<Supplier> builder)
         {
             builder
-                .Property(s => s.CompanyName)
-                .HasMaxLength(100)
-                .IsRequired();
+                    .Property(s => s.CompanyName)
+                    .HasMaxLength(100)
+                    .IsRequired();
+
+            builder
+                    .Property(s => s.Id)
+                    .ValueGeneratedNever();
         }
     }
 }
