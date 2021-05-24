@@ -1,9 +1,11 @@
-﻿using System.Text;
+﻿using System;
+using System.Text;
 using System.Threading.Tasks;
 using BLL.DTOs;
 using BLL.Exceptions;
 using BLL.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using RabbitMQ.Client;
 
@@ -23,13 +25,13 @@ namespace API.Controllers
     public class CategoriesController : ControllerBase
     {
         private readonly ICategoryService _categoryService;
+        private readonly ILogger<CategoriesController> _logger;
 
-
-        public CategoriesController(ICategoryService categoryService)
+        public CategoriesController(ICategoryService categoryService, ILogger<CategoriesController> logger)
         {
             _categoryService = categoryService;
+            _logger = logger;
         }
-
 
         /// <summary>
         /// This method returns all categories
@@ -41,9 +43,10 @@ namespace API.Controllers
         public async Task<IActionResult> GetAllCategories()
         {
             var categories = await _categoryService.GetAllAsync();
+            DateTime localDate = DateTime.Now;
+            _logger.LogInformation("/api/categories executed at {date}", localDate);
             return Ok(categories);
         }
-
 
         /// <summary>
         /// This method returns category that has an inputted Id property
@@ -58,6 +61,7 @@ namespace API.Controllers
             try
             {
                 var category = await _categoryService.GetByIdAsync(id);
+                _logger.LogInformation($"/api/categories/id returned category with id {id}");
                 return Ok(category);
             }
             catch (DbQueryResultNullException e)
@@ -69,7 +73,7 @@ namespace API.Controllers
         private void PublishToMessageQueue(string integrationEvent, string eventData)
         {
             // TOOO: Reuse and close connections and channel, etc,
-            var factory = new ConnectionFactory() { HostName = "192.168.39.180" };
+            var factory = new ConnectionFactory() {HostName = "192.168.39.162"};
             var connection = factory.CreateConnection();
             var channel = connection.CreateModel();
             var body = Encoding.UTF8.GetBytes(eventData);
@@ -78,7 +82,6 @@ namespace API.Controllers
                                  basicProperties: null,
                                  body: body);
         }
-
 
         /// <summary>
         /// This method returns category that was created and path to it
@@ -103,20 +106,21 @@ namespace API.Controllers
 
                 var integrationEventData = JsonConvert.SerializeObject(new
                 {
-                    id = createdCategory.Id,
-                    categoryName = createdCategory.CategoryName
+                        id = createdCategory.Id,
+                        categoryName = createdCategory.CategoryName
                 });
                 PublishToMessageQueue("categories.add", integrationEventData);
 
+                _logger.LogInformation($"Category added, id {createdCategory.Id}");
+
                 //Fetch the category from data source
-                return CreatedAtRoute("GetCategoryById", new { id = createdCategory.Id }, createdCategory);
+                return CreatedAtRoute("GetCategoryById", new {id = createdCategory.Id}, createdCategory);
             }
             catch (DbQueryResultNullException e)
             {
                 return NotFound(e.Message);
             }
         }
-
 
         /// <summary>
         /// This method changes category
@@ -135,14 +139,17 @@ namespace API.Controllers
                 if (!ModelState.IsValid)
                     return BadRequest(ModelState);
 
+                _categoryService.Update(categoryDto);
+
                 var integrationEventData = JsonConvert.SerializeObject(new
                 {
-                    id = categoryDto.Id,
-                    categoryName = categoryDto.CategoryName
+                        id = categoryDto.Id,
+                        categoryName = categoryDto.CategoryName
                 });
                 PublishToMessageQueue("categories.update", integrationEventData);
 
-                _categoryService.Update(categoryDto);
+                _logger.LogInformation($"Category updated, id {categoryDto.Id}");
+
                 return NoContent();
             }
             catch (DbQueryResultNullException e)
@@ -150,7 +157,6 @@ namespace API.Controllers
                 return NotFound(e.Message);
             }
         }
-
 
         /// <summary>
         /// This method deletes category
@@ -166,6 +172,7 @@ namespace API.Controllers
             try
             {
                 _categoryService.Remove(id);
+                _logger.LogInformation($"Category deleted, id {id}");
                 return NoContent();
             }
             catch (DbQueryResultNullException e)

@@ -1,5 +1,10 @@
+using System;
+using System.Reflection;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
+using Serilog;
+using API.Handlers;
 
 namespace API
 {
@@ -7,11 +12,33 @@ namespace API
     {
         public static void Main(string[] args)
         {
-            CreateHostBuilder(args).Build().Run();
+            LogsHandler.ConfigureLogging();
+            CreateHost(args);
+        }
+
+        private static void CreateHost(string[] args)
+        {
+            try
+            {
+                CreateHostBuilder(args).Build().Run();
+            }
+            catch (System.Exception ex)
+            {
+                Log.Fatal($"Failed to start {Assembly.GetExecutingAssembly().GetName().Name}", ex);
+                throw;
+            }
         }
 
         public static IHostBuilder CreateHostBuilder(string[] args) =>
-            Host.CreateDefaultBuilder(args)
-                .ConfigureWebHostDefaults(webBuilder => { webBuilder.UseStartup<Startup>(); });
+                Host.CreateDefaultBuilder(args)
+                    .ConfigureWebHostDefaults(webBuilder => { webBuilder.UseStartup<Startup>(); })
+                    .ConfigureAppConfiguration(configuration =>
+                    {
+                        configuration.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
+                        configuration.AddJsonFile(
+                                $"appsettings.{Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")}.json",
+                                optional: true);
+                    })
+                    .UseSerilog();
     }
 }

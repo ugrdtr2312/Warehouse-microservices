@@ -12,7 +12,7 @@ export class ProductDetailService {
 
   constructor(private http:HttpClient) { }
 
-  readonly baseURL = "http://192.168.39.180:80/products/api/products"
+  readonly baseURL = "http://192.168.39.162:80/products/api/products"
   formData:ProductDetail = new ProductDetail();
   list:ProductDetail[];
   categoryList:CategoryDetail[];
@@ -54,11 +54,11 @@ export class ProductDetailService {
           element.brandName = "-";
       });
     });
-    this.http.get("http://192.168.39.180:80/categories/api/categories").toPromise()
+    this.http.get("http://192.168.39.162:80/categories/api/categories").toPromise()
     .then(res => this.categoryList = res as CategoryDetail[]);
-    this.http.get("http://192.168.39.180:80/brands/api/brands").toPromise()
+    this.http.get("http://192.168.39.162:80/brands/api/brands").toPromise()
     .then(res => this.brandList = res as BrandDetail[]);
-    this.http.get("http://192.168.39.180:80/suppliers/api/suppliers").toPromise()
+    this.http.get("http://192.168.39.162:80/suppliers/api/suppliers").toPromise()
     .then(res => this.supplierList = res as SupplierDetail[]);
   }
 }

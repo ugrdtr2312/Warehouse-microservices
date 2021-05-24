@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System;
+using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using RabbitMQ.Client;
@@ -6,6 +7,7 @@ using BLL.DTOs;
 using BLL.Exceptions;
 using BLL.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 
 namespace API.Controllers
 {
@@ -23,11 +25,13 @@ namespace API.Controllers
     public class BrandsController : ControllerBase
     {
         private readonly IBrandService _brandsService;
+        private readonly ILogger<BrandsController> _logger;
 
 
-        public BrandsController(IBrandService brandsService)
+        public BrandsController(IBrandService brandsService, ILogger<BrandsController> logger)
         {
             _brandsService = brandsService;
+            _logger = logger;
         }
 
 
@@ -41,6 +45,8 @@ namespace API.Controllers
         public async Task<IActionResult> GetAllBrands()
         {
             var brands = await _brandsService.GetAllAsync();
+            DateTime localDate = DateTime.Now;
+            _logger.LogInformation("/api/brands executed at {date}", localDate);
             return Ok(brands);
         }
 
@@ -58,6 +64,7 @@ namespace API.Controllers
             try
             {
                 var brand = await _brandsService.GetByIdAsync(id);
+                _logger.LogInformation($"/api/brands/id returned brand with id {id}");
                 return Ok(brand);
             }
             catch (DbQueryResultNullException e)
@@ -69,7 +76,7 @@ namespace API.Controllers
         private void PublishToMessageQueue(string integrationEvent, string eventData)
         {
             // TOOO: Reuse and close connections and channel, etc,
-            var factory = new ConnectionFactory() { HostName = "192.168.39.180" };
+            var factory = new ConnectionFactory() { HostName = "192.168.39.162" };
             var connection = factory.CreateConnection();
             var channel = connection.CreateModel();
             var body = Encoding.UTF8.GetBytes(eventData);
@@ -108,6 +115,8 @@ namespace API.Controllers
                 });
                 PublishToMessageQueue("brands.add", integrationEventData);
 
+                _logger.LogInformation($"Brand added, id {createdBrand.Id}");
+
                 //Fetch the brand from data source
                 return CreatedAtRoute("GetBrandById", new { id = createdBrand.Id }, createdBrand);
             }
@@ -144,6 +153,8 @@ namespace API.Controllers
                 });
                 PublishToMessageQueue("brands.update", integrationEventData);
 
+                _logger.LogInformation($"Brand updated, id {brandDto.Id}");
+
                 return NoContent();
             }
             catch (DbQueryResultNullException e)
@@ -167,6 +178,7 @@ namespace API.Controllers
             try
             {
                 _brandsService.Remove(id);
+                _logger.LogInformation($"Brand deleted, id {id}");
                 return NoContent();
             }
             catch (DbQueryResultNullException e)

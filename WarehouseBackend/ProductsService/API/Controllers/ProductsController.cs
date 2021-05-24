@@ -43,7 +43,7 @@ namespace API.Controllers
         {
             var products = await _productService.GetAllAsync();
             DateTime localDate = DateTime.Now;
-            _logger.LogInformation("ProductsController executed at {date}", DateTime.UtcNow);
+            _logger.LogInformation("/api/products executed at {date}", localDate);
             return Ok(products);
         }
 
@@ -61,6 +61,7 @@ namespace API.Controllers
             try
             {
                 var product = await _productService.GetByIdAsync(id);
+                _logger.LogInformation($"/api/products/id returned product with id {id}");
                 return Ok(product);
             }
             catch (DbQueryResultNullException e)
@@ -147,6 +148,7 @@ namespace API.Controllers
             try
             {
                 _productService.Remove(id);
+                _logger.LogInformation($"Product deleted, id {id}");
                 return NoContent();
             }
             catch (DbQueryResultNullException e)

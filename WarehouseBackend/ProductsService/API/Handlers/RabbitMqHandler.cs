@@ -15,7 +15,7 @@ namespace API.Handlers
     {
         public static void ListenForIntegrationEvents()
         {
-            var factory = new ConnectionFactory() { HostName = "192.168.39.180" };
+            var factory = new ConnectionFactory() { HostName = "192.168.39.162" };
             var connection = factory.CreateConnection();
             var brandsChannel = connection.CreateModel();
             var categoriesChannel = connection.CreateModel();

@@ -8,6 +8,7 @@ using AuthorizationService.Handlers;
 using AuthorizationService.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 
 namespace AuthorizationService.Controllers
@@ -17,10 +18,12 @@ namespace AuthorizationService.Controllers
     public class ApplicationUserController : ControllerBase
     {
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly ILogger<ApplicationUserController> _logger;
 
-        public ApplicationUserController(UserManager<ApplicationUser> userManager)
+        public ApplicationUserController(UserManager<ApplicationUser> userManager, ILogger<ApplicationUserController> logger)
         {
             _userManager = userManager;
+            _logger = logger;
         }
 
         [HttpPost]
@@ -39,6 +42,8 @@ namespace AuthorizationService.Controllers
             {
                 var result = await _userManager.CreateAsync(applicationUser, model.Password);
                 await _userManager.AddToRoleAsync(applicationUser, model.Role);
+                DateTime localDate = DateTime.Now;
+                _logger.LogInformation($"/api/ApplicationUser/Register executed at {localDate} registred user {applicationUser.FullName}");
                 return Ok(result);
             }
             catch (Exception)
@@ -74,6 +79,8 @@ namespace AuthorizationService.Controllers
             var tokenHandler = new JwtSecurityTokenHandler();
             var securityToken = tokenHandler.CreateToken(tokenDescriptor);
             var token = tokenHandler.WriteToken(securityToken);
+            DateTime localDate = DateTime.Now;
+            _logger.LogInformation($"/api/ApplicationUser/Login executed at {localDate} logged in user {user.FullName}");
             return Ok(new { token });
         }
     }

@@ -1,9 +1,11 @@
-﻿using System.Text;
+﻿using System;
+using System.Text;
 using System.Threading.Tasks;
 using BLL.DTOs;
 using BLL.Exceptions;
 using BLL.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using RabbitMQ.Client;
 
@@ -23,27 +25,27 @@ namespace API.Controllers
     public class SuppliersController : ControllerBase
     {
         private readonly ISupplierService _supplierService;
+        private readonly ILogger<SuppliersController> _logger;
 
-
-        public SuppliersController(ISupplierService supplierService)
+        public SuppliersController(ISupplierService supplierService, ILogger<SuppliersController> logger)
         {
             _supplierService = supplierService;
+            _logger = logger;
         }
-
 
         /// <summary>
         /// This method returns all suppliers
         /// </summary>
         /// <response code="200">Returns all suppliers</response>
         //GET api/suppliers
-
         [HttpGet]
         public async Task<IActionResult> GetAllSuppliers()
         {
             var suppliers = await _supplierService.GetAllAsync();
+            DateTime localDate = DateTime.Now;
+            _logger.LogInformation("/api/suppliers executed at {date}", localDate);
             return Ok(suppliers);
         }
-
 
         /// <summary>
         /// This method returns supplier that has an inputted Id property
@@ -58,6 +60,7 @@ namespace API.Controllers
             try
             {
                 var supplier = await _supplierService.GetByIdAsync(id);
+                _logger.LogInformation($"/api/suppliers/id returned supplier with id {id}");
                 return Ok(supplier);
             }
             catch (DbQueryResultNullException e)
@@ -69,7 +72,7 @@ namespace API.Controllers
         private void PublishToMessageQueue(string integrationEvent, string eventData)
         {
             // TOOO: Reuse and close connections and channel, etc,
-            var factory = new ConnectionFactory() { HostName = "192.168.39.180" };
+            var factory = new ConnectionFactory() {HostName = "192.168.39.162"};
             var connection = factory.CreateConnection();
             var channel = connection.CreateModel();
             var body = Encoding.UTF8.GetBytes(eventData);
@@ -102,20 +105,21 @@ namespace API.Controllers
 
                 var integrationEventData = JsonConvert.SerializeObject(new
                 {
-                    id = createdSupplier.Id,
-                    companyName = createdSupplier.CompanyName
+                        id = createdSupplier.Id,
+                        companyName = createdSupplier.CompanyName
                 });
                 PublishToMessageQueue("suppliers.add", integrationEventData);
 
+                _logger.LogInformation($"Supplier added, id {createdSupplier.Id}");
+
                 //Fetch the supplier from data source
-                return CreatedAtRoute("GetSupplierById", new { id = createdSupplier.Id }, createdSupplier);
+                return CreatedAtRoute("GetSupplierById", new {id = createdSupplier.Id}, createdSupplier);
             }
             catch (DbQueryResultNullException e)
             {
                 return NotFound(e.Message);
             }
         }
-
 
         /// <summary>
         /// This method changes supplier
@@ -138,10 +142,12 @@ namespace API.Controllers
 
                 var integrationEventData = JsonConvert.SerializeObject(new
                 {
-                    id = supplierDto.Id,
-                    companyName = supplierDto.CompanyName
+                        id = supplierDto.Id,
+                        companyName = supplierDto.CompanyName
                 });
                 PublishToMessageQueue("suppliers.update", integrationEventData);
+
+                _logger.LogInformation($"Supplier updated, id {supplierDto.Id}");
 
                 return NoContent();
             }
@@ -150,7 +156,6 @@ namespace API.Controllers
                 return NotFound(e.Message);
             }
         }
-
 
         /// <summary>
         /// This method deletes supplier
@@ -166,6 +171,7 @@ namespace API.Controllers
             try
             {
                 _supplierService.Remove(id);
+                _logger.LogInformation($"Supplier deleted, id {id}");
                 return NoContent();
             }
             catch (DbQueryResultNullException e)
